@@ -1,0 +1,29 @@
+﻿# Local subject/norm docs
+en.subject.pdf
+fr.norm.pdf
+
+# Node artifacts
+**/node_modules/
+**/dist/
+**/.vite/
+**/coverage/
+**/*.log
+
+# Environments and secrets
+.env
+**/.env
+!/.env.example
+!backend/.env.example
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Runtime uploads (keep placeholders)
+backend/uploads/*
+!backend/uploads/.gitkeep
+!backend/uploads/avatars/
+backend/uploads/avatars/*
+!backend/uploads/avatars/.gitkeep

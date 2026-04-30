@@ -1,0 +1,14 @@
+{
+  "name": "ft_transcendence",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "backend:build": "npm --prefix backend run build",
+    "backend:lint": "npm --prefix backend run lint",
+    "backend:test": "npm --prefix backend run test -- --runInBand",
+    "backend:test:e2e": "npm --prefix backend run test:e2e -- --runInBand",
+    "frontend:build": "npm --prefix frontend run build",
+    "frontend:lint": "npm --prefix frontend run lint",
+    "check": "npm run backend:build && npm run backend:lint && npm run backend:test && npm run backend:test:e2e && npm run frontend:lint && npm run frontend:build"
+  }
+}
