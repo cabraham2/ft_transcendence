@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+}
+
+enum MatchStatus {
+  LIVE
+  FINISHED
+  CANCELED
+}
+
+enum TournamentStatus {
+  OPEN
+  IN_PROGRESS
+  FINISHED
+}
+
+enum TournamentMatchStatus {
+  PENDING
+  LIVE
+  FINISHED
+}
+
+model User {
+  id                 String                  @id @default(cuid())
+  email              String                  @unique
+  username           String                  @unique
+  displayName        String?
+  bio                String?
+  passwordHash       String
+  avatarUrl          String                  @default("/assets/default-avatar.svg")
+  preferredLanguage  String                  @default("en")
+  isOnline           Boolean                 @default(false)
+  lastSeenAt         DateTime?
+  wins               Int                     @default(0)
+  losses             Int                     @default(0)
+  elo                Int                     @default(1000)
+  xp                 Int                     @default(0)
+  level              Int                     @default(1)
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+  gameSettings       UserGameSettings?
+  outgoingFriendships Friendship[]           @relation("RequesterFriendships")
+  incomingFriendships Friendship[]           @relation("RecipientFriendships")
+  playerOneMatches   Match[]                 @relation("PlayerOneMatches")
+  playerTwoMatches   Match[]                 @relation("PlayerTwoMatches")
+  wonMatches         Match[]                 @relation("WonMatches")
+  createdTournaments Tournament[]            @relation("TournamentCreator")
+  championTournaments Tournament[]           @relation("TournamentChampion")
+  tournamentParticipants TournamentParticipant[]
+  tournamentMatchesAsP1 TournamentMatch[]    @relation("TournamentMatchPlayerOne")
+  tournamentMatchesAsP2 TournamentMatch[]    @relation("TournamentMatchPlayerTwo")
+  tournamentMatchesWon TournamentMatch[]     @relation("TournamentMatchWinner")
+  achievements       Achievement[]
+  createdHighlights  PublicHighlight[]       @relation("HighlightCreator")
+}
+
+model UserGameSettings {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  theme           String   @default("classic")
+  map             String   @default("arena")
+  paddleSize      Int      @default(120)
+  ballSpeed       Float    @default(6)
+  powerUpsEnabled Boolean  @default(false)
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Friendship {
+  id          String           @id @default(cuid())
+  requesterId String
+  recipientId String
+  status      FriendshipStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  requester   User             @relation("RequesterFriendships", fields: [requesterId], references: [id], onDelete: Cascade)
+  recipient   User             @relation("RecipientFriendships", fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, recipientId])
+}
+
+model Match {
+  id               String          @id @default(cuid())
+  status           MatchStatus     @default(LIVE)
+  playerOneId      String
+  playerTwoId      String
+  winnerId         String?
+  scoreOne         Int             @default(0)
+  scoreTwo         Int             @default(0)
+  settingsJson     Json
+  startedAt        DateTime        @default(now())
+  finishedAt       DateTime?
+  playerOne        User            @relation("PlayerOneMatches", fields: [playerOneId], references: [id], onDelete: Restrict)
+  playerTwo        User            @relation("PlayerTwoMatches", fields: [playerTwoId], references: [id], onDelete: Restrict)
+  winner           User?           @relation("WonMatches", fields: [winnerId], references: [id], onDelete: SetNull)
+  tournamentLink   TournamentMatch? @relation("LinkedPongMatch")
+}
+
+model Tournament {
+  id          String                  @id @default(cuid())
+  name        String
+  createdById String
+  status      TournamentStatus        @default(OPEN)
+  maxPlayers  Int                     @default(8)
+  settingsJson Json
+  createdAt   DateTime                @default(now())
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  championId  String?
+  createdBy   User                    @relation("TournamentCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  champion    User?                   @relation("TournamentChampion", fields: [championId], references: [id], onDelete: SetNull)
+  participants TournamentParticipant[]
+  matches     TournamentMatch[]
+}
+
+model TournamentParticipant {
+  id           String     @id @default(cuid())
+  tournamentId String
+  userId       String
+  seed         Int
+  joinedAt     DateTime   @default(now())
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tournamentId, userId])
+}
+
+model TournamentMatch {
+  id            String                @id @default(cuid())
+  tournamentId  String
+  round         Int
+  position      Int
+  playerOneId   String?
+  playerTwoId   String?
+  winnerId      String?
+  status        TournamentMatchStatus @default(PENDING)
+  linkedMatchId String?               @unique
+  startedAt     DateTime?
+  finishedAt    DateTime?
+  tournament    Tournament            @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  playerOne     User?                 @relation("TournamentMatchPlayerOne", fields: [playerOneId], references: [id], onDelete: SetNull)
+  playerTwo     User?                 @relation("TournamentMatchPlayerTwo", fields: [playerTwoId], references: [id], onDelete: SetNull)
+  winner        User?                 @relation("TournamentMatchWinner", fields: [winnerId], references: [id], onDelete: SetNull)
+  linkedMatch   Match?                @relation("LinkedPongMatch", fields: [linkedMatchId], references: [id], onDelete: SetNull)
+
+  @@unique([tournamentId, round, position])
+}
+
+model Achievement {
+  id         String   @id @default(cuid())
+  userId     String
+  key        String
+  unlockedAt DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+}
+
+model PublicHighlight {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   User?    @relation("HighlightCreator", fields: [createdById], references: [id], onDelete: SetNull)
+}
