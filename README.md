@@ -16,13 +16,13 @@ The project is designed to satisfy the modular `en.subject.pdf` requirements wit
 
 ### Quick start (single command)
 ```bash
-cp backend/.env.example .env   # local, git-ignored configuration (see below)
+cp .env.example .env   # then fill in every value (see below)
 docker compose up --build
 ```
 
-The `.env` file is ignored by Git (as required by the subject). `backend/.env.example` contains
-placeholder development values; generate your own secrets for anything public:
-`openssl rand -hex 32`.
+The `.env` file is ignored by Git (as required by the subject). `.env.example` lists every
+variable with empty values and a hint for each: fill them in before starting
+(e.g. `openssl rand -hex 32` for `JWT_SECRET`). The backend refuses to start without `JWT_SECRET`.
 
 ### Access
 - Application (HTTPS): `https://localhost`

@@ -12,6 +12,7 @@ fr.norm.pdf
 # Environments and secrets
 .env
 **/.env
+!/.env.example
 !backend/.env.example
 
 # OS / IDE
