@@ -6,7 +6,7 @@ register/login/logout, i18n, profile + avatar, friends, live matchmaking with fo
 stats, tournaments, the public API (API key, CRUD, rate limit) and a clean browser console.
 
 ```bash
-cp .env.example .env && docker compose up --build -d
+cp backend/.env.example .env && docker compose up --build -d
 set -a; . ./.env; set +a
 docker run --rm --network "$(basename "$PWD")_default" \
   -e NODE_TLS_REJECT_UNAUTHORIZED=0 -e BASE=https://nginx -e PUBLIC_API_KEY=$PUBLIC_API_KEY \

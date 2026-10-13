@@ -16,12 +16,12 @@ The project is designed to satisfy the modular `en.subject.pdf` requirements wit
 
 ### Quick start (single command)
 ```bash
-cp .env.example .env   # local, git-ignored configuration (see below)
+cp backend/.env.example .env   # local, git-ignored configuration (see below)
 docker compose up --build
 ```
 
-The `.env` file is ignored by Git (as required by the subject). `.env.example` contains
-working throwaway development values; generate your own secrets for anything public:
+The `.env` file is ignored by Git (as required by the subject). `backend/.env.example` contains
+placeholder development values; generate your own secrets for anything public:
 `openssl rand -hex 32`.
 
 ### Access
