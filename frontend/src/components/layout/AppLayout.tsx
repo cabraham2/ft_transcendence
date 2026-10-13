@@ -1,6 +1,7 @@
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
+import { Footer } from './Footer';
 import { LanguageSwitcher } from './LanguageSwitcher';
 
 export function AppLayout() {
@@ -14,7 +15,7 @@ export function AppLayout() {
           <Link to="/" className="brand-title">
             ft_transcendence
           </Link>
-          <p className="brand-subtitle">Pong League Platform</p>
+          <p className="brand-subtitle">{t('brand.subtitle')}</p>
         </div>
 
         <nav className="top-nav">
@@ -31,7 +32,7 @@ export function AppLayout() {
         <div className="topbar-actions">
           <LanguageSwitcher />
           <div className="user-chip">
-            <img src={user?.avatarUrl ?? '/assets/default-avatar.svg'} alt="avatar" />
+            <img src={user?.avatarUrl ?? '/assets/default-avatar.svg'} alt={t('profile.avatarAlt')} />
             <span>{user?.displayName ?? user?.username}</span>
           </div>
           <button type="button" className="ghost-button" onClick={logout}>
@@ -43,6 +44,7 @@ export function AppLayout() {
       <main className="page-content">
         <Outlet />
       </main>
+      <Footer />
     </div>
   );
 }

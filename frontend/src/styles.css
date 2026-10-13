@@ -382,8 +382,11 @@ textarea {
 
 .auth-screen {
   min-height: 100vh;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
   padding: 1rem;
 }
 
@@ -443,4 +446,32 @@ textarea {
   .two-column-page {
     grid-template-columns: 1fr;
   }
+}
+
+/* Footer and legal pages */
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.site-footer nav {
+  display: flex;
+  gap: 16px;
+}
+
+.legal-section {
+  margin-top: 16px;
+}
+
+.field-hint,
+label small {
+  display: block;
+  opacity: 0.75;
+  font-size: 0.8rem;
 }

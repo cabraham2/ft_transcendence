@@ -3,12 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { Panel } from '../components/ui/Panel';
 import { useAuth } from '../hooks/useAuth';
 import { tournamentsApi } from '../lib/api';
+import { useGuardedAction } from '../lib/guard';
 import { connectSocket } from '../lib/socket';
 import type { TournamentDetails, TournamentSummary } from '../types/api';
 
 export function TournamentsPage() {
   const { t } = useTranslation();
   const { token } = useAuth();
+  const { actionError, guarded } = useGuardedAction();
 
   const [tournaments, setTournaments] = useState<TournamentSummary[]>([]);
   const [selectedTournamentId, setSelectedTournamentId] = useState<string>('');
@@ -105,18 +107,20 @@ export function TournamentsPage() {
           <button
             type="button"
             className="primary-button"
-            onClick={async () => {
-              if (!token) {
-                return;
-              }
+            onClick={() =>
+              void guarded(async () => {
+                if (!token) {
+                  return;
+                }
 
-              await tournamentsApi.create(token, {
-                name: newName,
-                maxPlayers,
-              });
+                await tournamentsApi.create(token, {
+                  name: newName,
+                  maxPlayers,
+                });
 
-              await loadTournaments();
-            }}
+                await loadTournaments();
+              })
+            }
           >
             {t('tournaments.create')}
           </button>
@@ -124,20 +128,27 @@ export function TournamentsPage() {
       </Panel>
 
       <Panel title={details ? details.name : t('common.loading')}>
+        {actionError ? (
+          <p className="form-error" role="alert">
+            {actionError}
+          </p>
+        ) : null}
         {details ? (
           <>
             <div className="inline-actions">
               <button
                 type="button"
                 className="primary-button"
-                onClick={async () => {
-                  if (!token) {
-                    return;
-                  }
-                  await tournamentsApi.register(token, details.id);
-                  await loadDetails(details.id);
-                  await loadTournaments();
-                }}
+                onClick={() =>
+                  void guarded(async () => {
+                    if (!token) {
+                      return;
+                    }
+                    await tournamentsApi.register(token, details.id);
+                    await loadDetails(details.id);
+                    await loadTournaments();
+                  })
+                }
               >
                 {t('tournaments.register')}
               </button>
@@ -145,14 +156,16 @@ export function TournamentsPage() {
               <button
                 type="button"
                 className="ghost-button"
-                onClick={async () => {
-                  if (!token) {
-                    return;
-                  }
-                  await tournamentsApi.start(token, details.id);
-                  await loadDetails(details.id);
-                  await loadTournaments();
-                }}
+                onClick={() =>
+                  void guarded(async () => {
+                    if (!token) {
+                      return;
+                    }
+                    await tournamentsApi.start(token, details.id);
+                    await loadDetails(details.id);
+                    await loadTournaments();
+                  })
+                }
               >
                 {t('tournaments.start')}
               </button>
@@ -160,13 +173,15 @@ export function TournamentsPage() {
               <button
                 type="button"
                 className="ghost-button"
-                onClick={async () => {
-                  if (!token) {
-                    return;
-                  }
-                  const nextMatch = await tournamentsApi.nextMatch(token, details.id);
-                  setNextMatchId(nextMatch.match?.id ?? '');
-                }}
+                onClick={() =>
+                  void guarded(async () => {
+                    if (!token) {
+                      return;
+                    }
+                    const nextMatch = await tournamentsApi.nextMatch(token, details.id);
+                    setNextMatchId(nextMatch.match?.id ?? '');
+                  })
+                }
               >
                 {t('tournaments.nextMatch')}
               </button>
@@ -176,7 +191,7 @@ export function TournamentsPage() {
               <input
                 value={nextMatchId}
                 onChange={(event) => setNextMatchId(event.target.value)}
-                placeholder="Tournament match id"
+                placeholder={t('tournaments.matchIdPlaceholder')}
               />
               <button type="button" className="primary-button" onClick={queueForMatch}>
                 {t('tournaments.queueForMatch')}
@@ -188,13 +203,13 @@ export function TournamentsPage() {
                 .sort(([left], [right]) => Number(left) - Number(right))
                 .map(([round, matches]) => (
                   <div key={round} className="round-column">
-                    <h4>Round {round}</h4>
+                    <h4>{t('tournaments.round', { round })}</h4>
                     {matches.map((match) => (
                       <article key={match.id} className="match-card">
-                        <p>{match.playerOne?.username ?? 'TBD'}</p>
-                        <p>{match.playerTwo?.username ?? 'TBD'}</p>
+                        <p>{match.playerOne?.username ?? t('tournaments.tbd')}</p>
+                        <p>{match.playerTwo?.username ?? t('tournaments.tbd')}</p>
                         <small>{match.status}</small>
-                        {match.winner ? <strong>Winner: {match.winner.username}</strong> : null}
+                        {match.winner ? <strong>{t('tournaments.winner', { name: match.winner.username })}</strong> : null}
                       </article>
                     ))}
                   </div>

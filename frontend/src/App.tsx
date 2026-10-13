@@ -2,6 +2,7 @@ import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppLayout } from './components/layout/AppLayout';
+import { LegalShell } from './components/layout/LegalShell';
 import { useAuth } from './hooks/useAuth';
 import { DashboardPage } from './pages/DashboardPage';
 import { FriendsPage } from './pages/FriendsPage';
@@ -53,8 +54,11 @@ export function App() {
         <Route path="profile" element={<ProfilePage />} />
         <Route path="friends" element={<FriendsPage />} />
         <Route path="tournaments" element={<TournamentsPage />} />
-        <Route path="privacy" element={<PrivacyPage />} />
-        <Route path="terms" element={<TermsPage />} />
+      </Route>
+
+      <Route element={<LegalShell />}>
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to={user ? '/' : '/login'} replace />} />

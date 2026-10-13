@@ -3,6 +3,10 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  build: {
+    // nginx proxies /assets/ to the backend (default avatar), so the bundle must live elsewhere.
+    assetsDir: 'static',
+  },
   server: {
     host: '0.0.0.0',
     port: 5173,

@@ -1,4 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsBooleanString,
   IsIn,
@@ -27,12 +28,14 @@ export class SearchUsersDto {
 
   @ApiPropertyOptional({ example: 1, minimum: 1 })
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   page?: number;
 
   @ApiPropertyOptional({ example: 10, minimum: 1, maximum: 50 })
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   @Max(50)
@@ -40,11 +43,13 @@ export class SearchUsersDto {
 
   @ApiPropertyOptional({ example: 900 })
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   minElo?: number;
 
   @ApiPropertyOptional({ example: 1400 })
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   maxElo?: number;
 

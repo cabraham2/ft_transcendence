@@ -26,3 +26,10 @@ void i18n
   });
 
 export default i18n;
+
+// Keep <html lang> in sync with the selected language (accessibility / SEO).
+const syncDocumentLanguage = (language: string) => {
+  document.documentElement.lang = language.slice(0, 2);
+};
+i18n.on('languageChanged', syncDocumentLanguage);
+syncDocumentLanguage(i18n.language ?? 'en');

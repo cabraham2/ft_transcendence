@@ -72,7 +72,7 @@ export function DashboardPage() {
     const onStarted = (payload: { match: RuntimeMatchState }) => {
       setActiveMatch(payload.match);
       setIsInQueue(false);
-      setStatusMessage('Match started.');
+      setStatusMessage(t('dashboard.matchStarted'));
     };
 
     const onState = (payload: { match: RuntimeMatchState }) => {
@@ -81,7 +81,7 @@ export function DashboardPage() {
 
     const onFinished = (payload: { match: RuntimeMatchState }) => {
       setActiveMatch(payload.match);
-      setStatusMessage('Match finished.');
+      setStatusMessage(t('dashboard.matchFinished'));
       void loadSnapshot();
     };
 
@@ -150,7 +150,7 @@ export function DashboardPage() {
 
         socket.emit('matchmaking:join', { settings }, () => {
           setIsInQueue(true);
-          setStatusMessage('Queue joined.');
+          setStatusMessage(t('dashboard.queueJoined'));
         });
       },
       leave: () => {
@@ -161,20 +161,24 @@ export function DashboardPage() {
 
         socket.emit('matchmaking:leave', () => {
           setIsInQueue(false);
-          setStatusMessage('Queue left.');
+          setStatusMessage(t('dashboard.queueLeft'));
         });
       },
     };
-  }, [settings]);
+  }, [settings, t]);
 
   const saveSettings = async () => {
     if (!token || !settings) {
       return;
     }
 
-    const updated = await gameApi.updateMySettings(token, settings);
-    setSettings(updated);
-    setStatusMessage(t('common.success'));
+    try {
+      const updated = await gameApi.updateMySettings(token, settings);
+      setSettings(updated);
+      setStatusMessage(t('common.success'));
+    } catch {
+      setStatusMessage(t('common.error'));
+    }
   };
 
   return (
@@ -185,7 +189,7 @@ export function DashboardPage() {
 
         <div className="hero-badges">
           <span className={`badge ${socketOnline ? 'badge-online' : 'badge-offline'}`}>
-            WS: {socketOnline ? 'online' : 'offline'}
+            WS: {socketOnline ? t('dashboard.wsOnline') : t('dashboard.wsOffline')}
           </span>
           <span className="badge">ELO: {stats?.elo ?? '-'}</span>
           <span className="badge">W/L: {stats ? `${stats.wins}/${stats.losses}` : '-'}</span>
@@ -196,7 +200,7 @@ export function DashboardPage() {
             type="button"
             className="primary-button"
             onClick={queueActions.join}
-            disabled={!settings || !!activeMatch || isInQueue}
+            disabled={!settings || activeMatch?.status === 'live' || isInQueue}
           >
             {t('dashboard.queueJoin')}
           </button>
@@ -234,9 +238,9 @@ export function DashboardPage() {
                   )
                 }
               >
-                <option value="classic">Classic</option>
-                <option value="neon">Neon</option>
-                <option value="sunset">Sunset</option>
+                <option value="classic">{t('dashboard.themeClassic')}</option>
+                <option value="neon">{t('dashboard.themeNeon')}</option>
+                <option value="sunset">{t('dashboard.themeSunset')}</option>
               </select>
             </label>
 
@@ -250,9 +254,9 @@ export function DashboardPage() {
                   )
                 }
               >
-                <option value="arena">Arena</option>
-                <option value="space">Space</option>
-                <option value="grid">Grid</option>
+                <option value="arena">{t('dashboard.mapArena')}</option>
+                <option value="space">{t('dashboard.mapSpace')}</option>
+                <option value="grid">{t('dashboard.mapGrid')}</option>
               </select>
             </label>
 

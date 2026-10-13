@@ -8,15 +8,16 @@ const languages: Array<{ value: LanguageCode; label: string }> = [
 ];
 
 export function LanguageSwitcher() {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
 
   return (
-    <div className="language-switcher" role="group" aria-label="Language switcher">
+    <div className="language-switcher" role="group" aria-label={t('langswitch')}>
       {languages.map((language) => (
         <button
           key={language.value}
           type="button"
           className={i18n.language.startsWith(language.value) ? 'active' : ''}
+          aria-pressed={i18n.language.startsWith(language.value)}
           onClick={() => {
             void i18n.changeLanguage(language.value);
             localStorage.setItem('ft_transcendence_language', language.value);

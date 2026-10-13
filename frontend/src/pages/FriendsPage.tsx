@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Panel } from '../components/ui/Panel';
 import { useAuth } from '../hooks/useAuth';
 import { friendsApi, usersApi } from '../lib/api';
+import { useGuardedAction } from '../lib/guard';
 import type {
   FriendEntry,
   FriendRequestEntry,
@@ -13,6 +14,7 @@ import type {
 export function FriendsPage() {
   const { t } = useTranslation();
   const { token } = useAuth();
+  const { actionError, guarded } = useGuardedAction();
 
   const [friends, setFriends] = useState<FriendEntry[]>([]);
   const [incoming, setIncoming] = useState<FriendRequestEntry[]>([]);
@@ -64,9 +66,11 @@ export function FriendsPage() {
       return;
     }
 
-    await friendsApi.request(token, targetUserId.trim());
-    setTargetUserId('');
-    await refresh();
+    await guarded(async () => {
+      await friendsApi.request(token, targetUserId.trim());
+      setTargetUserId('');
+      await refresh();
+    });
   };
 
   return (
@@ -81,13 +85,15 @@ export function FriendsPage() {
               <button
                 type="button"
                 className="ghost-button"
-                onClick={async () => {
-                  if (!token) {
-                    return;
-                  }
-                  await friendsApi.remove(token, entry.friend.id);
-                  await refresh();
-                }}
+                onClick={() =>
+                  void guarded(async () => {
+                    if (!token) {
+                      return;
+                    }
+                    await friendsApi.remove(token, entry.friend.id);
+                    await refresh();
+                  })
+                }
               >
                 {t('friends.remove')}
               </button>
@@ -106,18 +112,24 @@ export function FriendsPage() {
           </button>
         </div>
 
-        <h4>Advanced User Search</h4>
+        {actionError ? (
+          <p className="form-error" role="alert">
+            {actionError}
+          </p>
+        ) : null}
+
+        <h4>{t('friends.search')}</h4>
         <div className="form-grid">
           <label>
-            <span>Query</span>
+            <span>{t('friends.query')}</span>
             <input
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="username or display name"
+              placeholder={t('friends.queryPlaceholder')}
             />
           </label>
           <label>
-            <span>Sort By</span>
+            <span>{t('friends.sortBy')}</span>
             <select
               value={searchSortBy}
               onChange={(event) =>
@@ -127,25 +139,25 @@ export function FriendsPage() {
               }
             >
               <option value="elo">ELO</option>
-              <option value="wins">Wins</option>
-              <option value="username">Username</option>
-              <option value="createdAt">Created</option>
+              <option value="wins">{t('friends.wins')}</option>
+              <option value="username">{t('friends.usernameSort')}</option>
+              <option value="createdAt">{t('friends.created')}</option>
             </select>
           </label>
           <label>
-            <span>Order</span>
+            <span>{t('friends.order')}</span>
             <select
               value={searchOrder}
               onChange={(event) =>
                 setSearchOrder(event.target.value as 'asc' | 'desc')
               }
             >
-              <option value="desc">Desc</option>
-              <option value="asc">Asc</option>
+              <option value="desc">{t('friends.desc')}</option>
+              <option value="asc">{t('friends.asc')}</option>
             </select>
           </label>
           <button type="button" className="primary-button" onClick={() => void runSearch(1)}>
-            Search
+            {t('friends.searchButton')}
           </button>
         </div>
 
@@ -160,15 +172,17 @@ export function FriendsPage() {
                   <button
                     type="button"
                     className="ghost-button"
-                    onClick={async () => {
-                      if (!token) {
-                        return;
-                      }
-                      await friendsApi.request(token, candidate.id);
-                      await refresh();
-                    }}
+                    onClick={() =>
+                      void guarded(async () => {
+                        if (!token) {
+                          return;
+                        }
+                        await friendsApi.request(token, candidate.id);
+                        await refresh();
+                      })
+                    }
                   >
-                    Add
+                    {t('friends.add')}
                   </button>
                 </li>
               ))}
@@ -180,10 +194,13 @@ export function FriendsPage() {
                 disabled={searchPage <= 1}
                 onClick={() => void runSearch(searchPage - 1)}
               >
-                Prev
+                {t('friends.prev')}
               </button>
               <span>
-                Page {searchPage} / {searchResults.pagination.totalPages}
+                {t('friends.page', {
+                  page: searchPage,
+                  total: searchResults.pagination.totalPages,
+                })}
               </span>
               <button
                 type="button"
@@ -191,7 +208,7 @@ export function FriendsPage() {
                 disabled={searchPage >= searchResults.pagination.totalPages}
                 onClick={() => void runSearch(searchPage + 1)}
               >
-                Next
+                {t('friends.next')}
               </button>
             </div>
           </>
@@ -206,13 +223,15 @@ export function FriendsPage() {
               <button
                 type="button"
                 className="primary-button"
-                onClick={async () => {
-                  if (!token) {
-                    return;
-                  }
-                  await friendsApi.accept(token, request.id);
-                  await refresh();
-                }}
+                onClick={() =>
+                  void guarded(async () => {
+                    if (!token) {
+                      return;
+                    }
+                    await friendsApi.accept(token, request.id);
+                    await refresh();
+                  })
+                }
               >
                 {t('friends.accept')}
               </button>

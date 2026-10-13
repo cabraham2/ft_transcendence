@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateHighlightDto } from './dto/create-highlight.dto';
 import { UpdateHighlightDto } from './dto/update-highlight.dto';
@@ -21,8 +25,8 @@ export class PublicApiService {
     });
   }
 
-  getHighlight(highlightId: string) {
-    return this.prisma.publicHighlight.findUnique({
+  async getHighlight(highlightId: string) {
+    const highlight = await this.prisma.publicHighlight.findUnique({
       where: { id: highlightId },
       include: {
         createdBy: {
@@ -33,9 +37,25 @@ export class PublicApiService {
         },
       },
     });
+
+    if (!highlight) {
+      throw new NotFoundException('Highlight not found.');
+    }
+
+    return highlight;
   }
 
-  createHighlight(dto: CreateHighlightDto) {
+  async createHighlight(dto: CreateHighlightDto) {
+    if (dto.createdById) {
+      const author = await this.prisma.user.findUnique({
+        where: { id: dto.createdById },
+        select: { id: true },
+      });
+      if (!author) {
+        throw new BadRequestException('createdById does not match any user.');
+      }
+    }
+
     return this.prisma.publicHighlight.create({
       data: {
         title: dto.title.trim(),

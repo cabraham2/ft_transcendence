@@ -91,7 +91,12 @@ export class UsersController {
       fileFilter: (_request, file, callback) => {
         const extension = extname(file.originalname).toLowerCase();
         if (!allowedExtensions.has(extension)) {
-          callback(new Error('Unsupported file format.'), false);
+          callback(
+            new BadRequestException(
+              'Unsupported file format (png, jpg, webp).',
+            ),
+            false,
+          );
           return;
         }
         callback(null, true);

@@ -56,7 +56,7 @@ export class GameGateway
 
     try {
       const payload = this.jwtService.verify<JwtPayload>(token, {
-        secret: this.configService.get<string>('JWT_SECRET', 'dev_jwt_secret'),
+        secret: this.configService.getOrThrow<string>('JWT_SECRET'),
       });
 
       const socketData = client.data as Record<string, unknown>;

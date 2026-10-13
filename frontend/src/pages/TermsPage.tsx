@@ -1,12 +1,5 @@
-import { useTranslation } from 'react-i18next';
-import { Panel } from '../components/ui/Panel';
+import { LegalDocument } from '../components/ui/LegalDocument';
 
 export function TermsPage() {
-  const { t } = useTranslation();
-
-  return (
-    <Panel title={t('terms.title')}>
-      <p>{t('terms.body')}</p>
-    </Panel>
-  );
+  return <LegalDocument namespace="terms" sections={7} />;
 }

@@ -771,65 +771,70 @@ export class GameService implements OnModuleInit, OnModuleDestroy {
         : runtimeMatch.playerOne.userId
       : undefined;
 
-    await this.prisma.$transaction(async (tx) => {
-      await tx.match.update({
-        where: { id: runtimeMatch.id },
-        data: {
-          status: winnerId ? MatchStatus.FINISHED : MatchStatus.CANCELED,
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        await tx.match.update({
+          where: { id: runtimeMatch.id },
+          data: {
+            status: winnerId ? MatchStatus.FINISHED : MatchStatus.CANCELED,
+            winnerId,
+            scoreOne: runtimeMatch.scoreOne,
+            scoreTwo: runtimeMatch.scoreTwo,
+            finishedAt,
+          },
+        });
+
+        if (!winnerId || !loserId) {
+          return;
+        }
+
+        const [winnerUser, loserUser] = await Promise.all([
+          tx.user.findUnique({ where: { id: winnerId } }),
+          tx.user.findUnique({ where: { id: loserId } }),
+        ]);
+
+        if (!winnerUser || !loserUser) {
+          return;
+        }
+
+        const updatedRatings = calculateElo(winnerUser.elo, loserUser.elo);
+        const winnerXp = winnerUser.xp + 120;
+        const loserXp = loserUser.xp + 40;
+
+        await tx.user.update({
+          where: { id: winnerId },
+          data: {
+            wins: { increment: 1 },
+            elo: updatedRatings.winner,
+            xp: winnerXp,
+            level: levelFromXp(winnerXp),
+          },
+        });
+
+        await tx.user.update({
+          where: { id: loserId },
+          data: {
+            losses: { increment: 1 },
+            elo: updatedRatings.loser,
+            xp: loserXp,
+            level: levelFromXp(loserXp),
+          },
+        });
+
+        await unlockAchievements(tx, winnerId);
+        await unlockAchievements(tx, loserId);
+      });
+
+      if (runtimeMatch.tournamentMatchId && winnerId) {
+        await this.tournamentsService.resolveMatchFromGame(
+          runtimeMatch.tournamentMatchId,
           winnerId,
-          scoreOne: runtimeMatch.scoreOne,
-          scoreTwo: runtimeMatch.scoreTwo,
-          finishedAt,
-        },
-      });
-
-      if (!winnerId || !loserId) {
-        return;
+          runtimeMatch.id,
+        );
       }
-
-      const [winnerUser, loserUser] = await Promise.all([
-        tx.user.findUnique({ where: { id: winnerId } }),
-        tx.user.findUnique({ where: { id: loserId } }),
-      ]);
-
-      if (!winnerUser || !loserUser) {
-        return;
-      }
-
-      const updatedRatings = calculateElo(winnerUser.elo, loserUser.elo);
-      const winnerXp = winnerUser.xp + 120;
-      const loserXp = loserUser.xp + 40;
-
-      await tx.user.update({
-        where: { id: winnerId },
-        data: {
-          wins: { increment: 1 },
-          elo: updatedRatings.winner,
-          xp: winnerXp,
-          level: levelFromXp(winnerXp),
-        },
-      });
-
-      await tx.user.update({
-        where: { id: loserId },
-        data: {
-          losses: { increment: 1 },
-          elo: updatedRatings.loser,
-          xp: loserXp,
-          level: levelFromXp(loserXp),
-        },
-      });
-
-      await unlockAchievements(tx, winnerId);
-      await unlockAchievements(tx, loserId);
-    });
-
-    if (runtimeMatch.tournamentMatchId && winnerId) {
-      await this.tournamentsService.resolveMatchFromGame(
-        runtimeMatch.tournamentMatchId,
-        winnerId,
-        runtimeMatch.id,
-      );
+    } catch (error) {
+      // Persisting must never leave players stuck on a finished match.
+      this.logger.error(`Failed to persist match ${runtimeMatch.id}`, error);
     }
 
     this.server?.to(runtimeMatch.roomId).emit('game:finished', {

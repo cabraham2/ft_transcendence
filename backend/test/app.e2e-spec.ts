@@ -4,6 +4,9 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 
+// The app refuses to start without a JWT secret; use a throwaway one for tests.
+process.env.JWT_SECRET ??= 'e2e-test-secret';
+
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
 

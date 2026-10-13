@@ -27,6 +27,9 @@ const userSelect = {
   updatedAt: true,
 } as const;
 
+// Same as userSelect but without the private email address (public endpoints).
+const publicUserSelect = { ...userSelect, email: false } as const;
+
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
@@ -44,9 +47,7 @@ export class UsersService {
   async getProfile(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: {
-        ...userSelect,
-      },
+      select: publicUserSelect,
     });
 
     if (!user) {
@@ -158,7 +159,7 @@ export class UsersService {
         orderBy: {
           [sortBy]: order,
         },
-        select: userSelect,
+        select: publicUserSelect,
       }),
     ]);
 

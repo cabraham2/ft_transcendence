@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { authApi, ApiError } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
+import { Footer } from '../components/layout/Footer';
 
 export function LoginPage() {
   const { t } = useTranslation();
@@ -61,7 +62,11 @@ export function LoginPage() {
           />
         </label>
 
-        {error ? <p className="form-error">{error}</p> : null}
+        {error ? (
+          <p className="form-error" role="alert">
+            {error}
+          </p>
+        ) : null}
 
         <button type="submit" className="primary-button" disabled={isSubmitting}>
           {isSubmitting ? t('common.loading') : t('auth.submit')}
@@ -71,6 +76,7 @@ export function LoginPage() {
           {t('auth.switchToRegister')}
         </Link>
       </form>
+      <Footer />
     </div>
   );
 }

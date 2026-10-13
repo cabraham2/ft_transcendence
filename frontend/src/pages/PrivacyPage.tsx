@@ -1,12 +1,5 @@
-import { useTranslation } from 'react-i18next';
-import { Panel } from '../components/ui/Panel';
+import { LegalDocument } from '../components/ui/LegalDocument';
 
 export function PrivacyPage() {
-  const { t } = useTranslation();
-
-  return (
-    <Panel title={t('privacy.title')}>
-      <p>{t('privacy.body')}</p>
-    </Panel>
-  );
+  return <LegalDocument namespace="privacy" sections={7} />;
 }
