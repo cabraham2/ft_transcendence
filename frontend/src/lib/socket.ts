@@ -1,4 +1,4 @@
-﻿import { io, Socket } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 
 const WS_URL = import.meta.env.VITE_WS_BASE_URL ?? window.location.origin;
 

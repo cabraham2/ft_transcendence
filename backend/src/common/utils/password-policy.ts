@@ -1,4 +1,4 @@
-﻿import { BadRequestException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 
 export function assertStrongPassword(password: string): void {
   const hasUpper = /[A-Z]/.test(password);

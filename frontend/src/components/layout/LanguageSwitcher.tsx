@@ -1,4 +1,4 @@
-﻿import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import type { LanguageCode } from '../../types/api';
 
 const languages: Array<{ value: LanguageCode; label: string }> = [

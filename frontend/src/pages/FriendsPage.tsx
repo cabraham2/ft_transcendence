@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Panel } from '../components/ui/Panel';
 import { useAuth } from '../hooks/useAuth';

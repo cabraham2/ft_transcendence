@@ -1,4 +1,4 @@
-﻿import { useMemo } from 'react';
+import { useMemo } from 'react';
 import type { RuntimeMatchState } from '../../types/api';
 
 type MatchCanvasProps = {

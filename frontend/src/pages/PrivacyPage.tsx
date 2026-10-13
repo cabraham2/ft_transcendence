@@ -1,4 +1,4 @@
-﻿import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { Panel } from '../components/ui/Panel';
 
 export function PrivacyPage() {

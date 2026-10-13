@@ -1,4 +1,4 @@
-﻿import { Link, NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import { LanguageSwitcher } from './LanguageSwitcher';

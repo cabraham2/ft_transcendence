@@ -1,4 +1,4 @@
-﻿export type LanguageCode = 'fr' | 'en' | 'es';
+export type LanguageCode = 'fr' | 'en' | 'es';
 
 export interface UserProfile {
   id: string;
